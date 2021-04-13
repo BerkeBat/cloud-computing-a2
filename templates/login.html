@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>{% block title %}Login{% endblock %}</title>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-sm-4"></div>
+    <div style="padding-top: 20px;" class="col-sm-4">
+        {% if login_success == False %}
+          <div class="alert alert-danger" role="alert" id="alertdiv" style="display: block;">
+            Email or password is invalid.
+          </div>
+        {% endif %}
+        <form action="/login" method="POST">
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" class="form-control" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="pass">Password:</label>
+              <input type="password" class="form-control" name="pass" required>
+            </div>
+            <button type="submit" class="btn btn-dark">Login</button>
+        </form>
+        <a style="color: black ;" href="/register" class="btn btn-link" role="button">No account? Register</a>
+    </div>
+    <div class="col-sm-4"></div>
+</div>
+{% endblock %}
