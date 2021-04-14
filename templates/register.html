@@ -10,7 +10,7 @@
     <div style="padding-top: 20px;" class="col-sm-4">
         {% if register_success == False %}
           <div class="alert alert-danger" role="alert" id="alertdiv" style="display: block;">
-            The {{ already_exists }} already exists, please try another.
+            The email already exists, please try another.
           </div>
         {% endif %}
         <form action="/register" method="POST">

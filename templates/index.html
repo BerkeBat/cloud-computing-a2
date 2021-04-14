@@ -5,5 +5,83 @@
 {% endblock %}
 
 {% block body %}
-
+<div class="row">
+    <div style="padding-left: 20px;" class="col-sm-4">
+        <h1><i class="fas fa-list"></i> Subscriptions</h1>
+        {% if user_subscriptions|length > 0 %}
+            {% for song in user_subscriptions %}
+            <div class="card" >
+                <div class="row">
+                    <div class="col-sm-10">
+                        <div class="card-body">
+                        <h5 class="card-title">{{ song['title'] }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ song['artist'] }} • {{ song['year'] }}</h6>
+                        </div>
+                    </div>
+                    <div style="padding-top: 35px;" class="col-sm-2">
+                        <form action="/" method="POST">
+                            <input type="hidden" name="post_type" value="remove">
+                            <input type="hidden" name="song_to_remove" value="{{ song['title'] }}">
+                            <input style="font-size:x-small" type="submit" class="btn btn-danger" value="Remove">
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% elif g.current_user != None %}
+            <i><h4>You have no subscriptions. Make a query in the query area to add one.</h4></i>
+        {% else %}
+            <i><h4>Please log in to add and view subscriptions</h4></i>
+        {% endif %}
+        
+        
+    </div>
+    <script>
+        function atleastOneQueryValue() {
+            title_element = document.getElementById("title");
+            year_element = document.getElementById("year");
+            artist_element = document.getElementById("artist");
+            emptyQueryAlert_element = document.getElementById("emptyQueryAlert")
+            queryForm = document.getElementById("queryForm")
+            if( title_element.value == "" &&
+                year_element.value == "" &&
+                artist_element.value == ""){
+                    queryForm.action = "javascript:void(0);"
+                    emptyQueryAlert_element.style.display = "block"
+                } else{
+                    queryForm.action = "/"
+                    emptyQueryAlert_element.style.display = "none"
+                }
+        }
+    </script>
+    <div class="col-sm-2">
+        <h1><i class="fas fa-search"></i> Query</h1>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <form action="javascript:void(0);" method="POST" id="queryForm" style="padding-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input type="text" class="form-control" name="title" id="title">
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year:</label>
+                        <input type="text" class="form-control" name="year" id="year">
+                    </div>
+                    <div class="form-group">
+                        <label for="artist">Artist:</label>
+                        <input type="text" class="form-control" name="artist" id="artist">
+                    </div>
+                    <input type="hidden" name="post_type" value="query">
+                    <button type="submit" onclick="atleastOneQueryValue()" class="btn btn-dark">Query</button>
+                </form>
+                <div class="alert alert-danger" role="alert" style="display:none" id="emptyQueryAlert">
+                    Please enter at least 1 value to query.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <h4>Query Results</h4>
+    </div>
+</div>
 {% endblock %}
