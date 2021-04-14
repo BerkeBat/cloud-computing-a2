@@ -17,6 +17,7 @@ def index():
     global current_user
     g.current_user = current_user
     queried_music = []
+    made_query = False
     if request.method == 'POST':
         if request.form['post_type'] == "subscribe":
             update_subscription("add", current_user, request.form['song_to_subscribe'])
@@ -26,12 +27,13 @@ def index():
             query_title = request.form['title']
             query_year = request.form['year']
             query_artist = request.form['artist']
-            queried_music = query_music(title = query_title, year = query_year, artist = query_artist)    
+            queried_music = query_music(title = query_title, year = query_year, artist = query_artist)  
+            made_query = True  
     if current_user != None:
         user_subscriptions = get_subscriptions_details(current_user['subscriptions'])
-        return render_template('index.html', user_subscriptions=user_subscriptions, queried_music=queried_music)
+        return render_template('index.html', user_subscriptions=user_subscriptions, queried_music=queried_music, made_query=made_query)
     else:
-        return render_template('index.html',queried_music=queried_music)
+        return render_template('index.html',queried_music=queried_music, made_query=made_query)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
