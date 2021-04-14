@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, g
 import boto3
+from boto3.dynamodb.conditions import Key, Attr
 import logging
 
 app = Flask(__name__)
@@ -15,15 +16,23 @@ current_user = None
 def index():
     global current_user
     g.current_user = current_user
+    queried_music = []
     if request.method == 'POST':
-        if request.form['post_type'] == "remove":
-            remove_subscription(current_user, request.form['song_to_remove'])
+        if request.form['post_type'] == "subscribe":
+            update_subscription("add", current_user, request.form['song_to_subscribe'])
+        elif request.form['post_type'] == "remove":
+            update_subscription("remove", current_user, request.form['song_to_remove'])
+        elif request.form['post_type'] == "query":
+            query_title = request.form['title']
+            query_year = request.form['year']
+            query_artist = request.form['artist']
+            queried_music = query_music(title = query_title, year = query_year, artist = query_artist)    
+
     if current_user != None:
         user_subscriptions = get_subscriptions_details(current_user['subscriptions'])
-        return render_template('index.html', user_subscriptions=user_subscriptions)
-
-    return render_template('index.html')
-
+        return render_template('index.html', user_subscriptions=user_subscriptions, queried_music=queried_music)
+    else:
+        return render_template('index.html',queried_music=queried_music)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -58,7 +67,6 @@ def register():
             return redirect(url_for('login'))
     return render_template('register.html', register_success=register_success)
 
-
 @app.route('/logout')
 def logout():
     global current_user
@@ -73,7 +81,20 @@ def login_valid(email, password):
     if user != None and email == user['email'] and password == user['password']:
         valid = True     
 
-    return valid 
+    return valid
+
+def query_music(**kwargs):
+    query_filter_list = []
+    for key, value in kwargs.items():
+        if value != "":
+            query_filter_list.append("Attr('{}').eq('{}')".format(key,value))
+    query_filter_expression = " & ".join(f for f in query_filter_list)
+    music_response = music_table.scan(
+        FilterExpression=eval(query_filter_expression)
+    )
+    music = music_response['Items']
+
+    return music
 
 def get_user_by_email(email):
     try:
@@ -92,22 +113,26 @@ def get_subscriptions_details(subscriptions):
             song_details = song_details_response['Item']
             song_details_list.append(song_details)
     except:
-        return
+        print("Error getting subscriptions")
+
     return song_details_list
 
-def remove_subscription(user, song):
+def update_subscription(addremove, user, song):
     user_subscriptions = user['subscriptions']
-    user_subscriptions.remove(song)
+    if(addremove=="add"):
+        user_subscriptions.append(song)
+    elif(addremove=="remove"):
+        user_subscriptions.remove(song)
+        
     login_table.update_item(
         Key={
             'email':current_user['email']
         },
         UpdateExpression='SET subscriptions = :val',
-        ExpressionAttributeValues={':val':user_subscriptions}
+        ExpressionAttributeValues={':val': user_subscriptions}
     )
 
-
-def register_user(email,username,password):
+def register_user(email, username, password):
     success = True
     try:
         login_table.put_item(
@@ -120,6 +145,7 @@ def register_user(email,username,password):
         )
     except:
         success = False
+        print("Error registering user.")
     return success
 
 if __name__ == '__main__':

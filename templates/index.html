@@ -33,8 +33,6 @@
         {% else %}
             <i><h4>Please log in to add and view subscriptions</h4></i>
         {% endif %}
-        
-        
     </div>
     <script>
         function atleastOneQueryValue() {
@@ -81,7 +79,34 @@
         </div>
     </div>
     <div class="col-sm-6">
-        <h4>Query Results</h4>
+        {% if queried_music|length > 0 %}
+                {% for song in queried_music %}
+                <div class="card" >
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <div class="card-body">
+                            <h5 class="card-title">{{ song['title'] }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ song['artist'] }} • {{ song['year'] }}</h6>
+                            </div>
+                        </div>
+                        <div style="padding-top: 35px;" class="col-sm-2">
+                            <form action="/" method="POST">
+                                <input type="hidden" name="post_type" value="subscribe">
+                                <input type="hidden" name="song_to_subscribe" value="{{ song['title'] }}">
+                                {% if g.current_user != None %}
+                                    <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe">
+                                {% else %}
+                                    <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe" disabled>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+        {% else %}
+                <i><h4>No result is retrieved. Please query again.</h4></i>
+        {% endif %}
+        
     </div>
 </div>
 {% endblock %}
