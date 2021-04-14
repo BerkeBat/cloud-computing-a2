@@ -27,7 +27,6 @@ def index():
             query_year = request.form['year']
             query_artist = request.form['artist']
             queried_music = query_music(title = query_title, year = query_year, artist = query_artist)    
-
     if current_user != None:
         user_subscriptions = get_subscriptions_details(current_user['subscriptions'])
         return render_template('index.html', user_subscriptions=user_subscriptions, queried_music=queried_music)
@@ -123,7 +122,6 @@ def update_subscription(addremove, user, song):
         user_subscriptions.append(song)
     elif(addremove=="remove"):
         user_subscriptions.remove(song)
-        
     login_table.update_item(
         Key={
             'email':current_user['email']
