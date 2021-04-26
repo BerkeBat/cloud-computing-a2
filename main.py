@@ -11,7 +11,6 @@ login_table = db.Table('login')
 music_table = db.Table('music')
 current_user = None
 
-
 @app.route('/', methods=['POST', 'GET'])
 def index():
     global current_user
@@ -90,10 +89,14 @@ def query_music(**kwargs):
         if value != "":
             query_filter_list.append("Attr('{}').eq('{}')".format(key,value))
     query_filter_expression = " & ".join(f for f in query_filter_list)
-    music_response = music_table.scan(
-        FilterExpression=eval(query_filter_expression)
-    )
-    music = music_response['Items']
+    try:
+        music_response = music_table.scan(
+            FilterExpression=eval(query_filter_expression)
+        )
+        music = music_response['Items']
+    except:
+        app.logger.warning("music query failed. returning empty result")
+        music = []
 
     return music
 
@@ -124,13 +127,16 @@ def update_subscription(addremove, user, song):
         user_subscriptions.append(song)
     elif(addremove=="remove"):
         user_subscriptions.remove(song)
-    login_table.update_item(
-        Key={
-            'email':current_user['email']
-        },
-        UpdateExpression='SET subscriptions = :val',
-        ExpressionAttributeValues={':val': user_subscriptions}
-    )
+    try:
+        login_table.update_item(
+            Key={
+                'email':current_user['email']
+            },
+            UpdateExpression='SET subscriptions = :val',
+            ExpressionAttributeValues={':val': user_subscriptions}
+        )
+    except:
+        app.logger.warning("updating subscription (add/remove) failed.")
 
 def register_user(email, username, password):
     success = True

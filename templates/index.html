@@ -83,34 +83,34 @@
         </div>
     </div>
     <div class="col-sm-5">
-        <i><h1 style="padding-bottom: 10px;"><i class="fas fa-music"></i> Query Results</h1></i>
+        <h1 style="padding-bottom: 10px;"><i class="fas fa-music"></i> Query Results</h1>
         {% if made_query == True and queried_music|length > 0 %}
             {% for song in queried_music %}
-            <div class="card bg-dark text-white" >
-                <div class="row">
-                    <div class="col-sm-1">
-                        {% set artist_name_list = song['artist'].split(' ') %}
-                        <img style="width:100px;height:100px;" src="https://cc-assignment2-berke-artist-images.s3-ap-southeast-2.amazonaws.com/{{ artist_name_list|join('+') }}.jpg" alt="">
-                    </div>
-                    <div style="padding-left: 50px;" class="col-sm-9">
-                        <div class="card-body">
-                        <h5 class="card-title">{{ song['title'] }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ song['artist'] }} • {{ song['year'] }}</h6>
+                <div class="card bg-dark text-white" >
+                    <div class="row">
+                        <div class="col-sm-1">
+                            {% set artist_name_list = song['artist'].split(' ') %}
+                            <img style="width:100px;height:100px;" src="https://cc-assignment2-berke-artist-images.s3-ap-southeast-2.amazonaws.com/{{ artist_name_list|join('+') }}.jpg" alt="">
+                        </div>
+                        <div style="padding-left: 50px;" class="col-sm-9">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ song['title'] }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ song['artist'] }} • {{ song['year'] }}</h6>
+                            </div>
+                        </div>
+                        <div style="padding-top: 35px;" class="col-sm-2">
+                            <form action="/" method="POST">
+                                <input type="hidden" name="post_type" value="subscribe">
+                                <input type="hidden" name="song_to_subscribe" value="{{ song['title'] }}">
+                                {% if g.current_user == None or song['title'] in g.current_user['subscriptions'] %}
+                                    <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe" disabled>
+                                {% else %}
+                                    <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe">
+                                {% endif %}
+                            </form>
                         </div>
                     </div>
-                    <div style="padding-top: 35px;" class="col-sm-2">
-                        <form action="/" method="POST">
-                            <input type="hidden" name="post_type" value="subscribe">
-                            <input type="hidden" name="song_to_subscribe" value="{{ song['title'] }}">
-                            {% if g.current_user != None %}
-                                <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe">
-                            {% else %}
-                                <input style="font-size:small" type="submit" class="btn btn-info" value="Subscribe" disabled>
-                            {% endif %}
-                        </form>
-                    </div>
                 </div>
-            </div>
             {% endfor %}
         {% elif made_query == True and queried_music|length < 1 %}
             <i><h4>No result is retrieved. Please query again.</h4></i>
